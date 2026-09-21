@@ -1,129 +1,75 @@
-<div align="center">
+﻿# aipass bridge
 
-<img width="420" alt="aipass bridge" src="https://github.com/user-attachments/assets/e79fbcbb-0a47-494a-af70-b315586fe3a7" />
+**ทำให้ AiPASS ใช้งานได้เต็มที่ยิ่งขึ้น — ตอนนี้ใช้ผ่าน Terminal ได้แล้ว**
 
-# aipass bridge
+AiPASS เปิดให้คนไทยเข้าถึงโมเดล AI ระดับโปรมากกว่า 30 โมเดลได้ฟรี โปรเจกต์นี้นำ AiPASS มาเชื่อมกับ Terminal, Editor และเครื่องมือที่รองรับ OpenAI-compatible API พร้อมความสามารถในการอ่านและเขียนไฟล์ภายในเครื่อง
 
-**Make AiPASS great again — now with a terminal.**
+## ทำอะไรได้บ้าง
 
-[AiPASS](https://aipass.go.th/) gives every Thai citizen free access to 30+ pro AI models.
-It only speaks one language though: a chat box. This puts it in your terminal, your
-editor, and any OpenAI-compatible tool — and lets it read and write your local files.
+- แชตจาก Terminal แบบ streaming พร้อม Web Search และแหล่งอ้างอิง
+- ใช้โมเดลทั้งหมดที่บัญชีเลือกได้ รวม 33 โมเดล ทั้งโมเดลสร้างภาพ วิดีโอ และเพลง
+- สร้างภาพและรับไฟล์ PNG
+- แนบเอกสารและถามเกี่ยวกับเอกสาร
+- สร้างวิดีโอและเพลง เช่น Seedance, Veo และ Lyria
+- แก้ไขไฟล์ในเครื่องด้วย agent ที่อ่าน ค้นหา และแก้ไขโปรเจกต์
+- ตรวจสอบ credit pool ได้จาก popup และหลังการทำงานของ agent
+- ใช้เป็น OpenAI-compatible endpoint สำหรับ SDK และเครื่องมือที่รองรับ Base URL
+- รันแบบ headless บนเซิร์ฟเวอร์ได้
 
-[![test](https://github.com/niawjunior/aipass-bridge/actions/workflows/test.yml/badge.svg)](https://github.com/niawjunior/aipass-bridge/actions/workflows/test.yml)
+Credential ไม่ออกจากเบราว์เซอร์ คำขอจริงทำงานภายในแท็บ Chrome ที่ล็อกอินอยู่ และ bridge จะไม่เห็น session cookie หรือเขียน credential ลงดิสก์
 
-</div>
+## เริ่มต้นใช้งาน
 
----
+    npm run dev
 
-## What it does
+จากนั้นเปิด chrome://extensions → Developer mode → Load unpacked → เลือก aipass-bridge/extension และเปิดแท็บ https://de.aipass.net/chat โดย popup ควรแสดง Connected
 
-```
-your terminal ──▶ OpenAI-compatible API on localhost:8787 ──▶ a real logged-in AiPASS tab
-```
+### คำสั่งที่ใช้บ่อย
 
-- **Chat from the terminal**, streaming, with web search and sources.
-- **Every model the account can pick** — 33 of them, including the image, video
-  and music generators, grouped the way the web UI groups them.
-- **Generate images** — pick an image model, get a PNG
-  ([example](aipass-bridge/README.md#a-worked-example)).
-- **Attach documents** — `--file report.pdf`, and ask about it.
-- **Video and music too** — Seedance, Veo and Lyria, saved to disk like images
-  ([clip](aipass-bridge/README.md#video-from-a-real-run)). Video is a polled job
-  upstream, not a stream, and the bridge hides that difference.
-- **Edit local files** — an agent that reads, searches, and edits a project you point it at.
-- **See what it costs** — the credit pool, in the popup and after every agent run.
-- **Drop-in OpenAI endpoint** — point the `openai` SDK, or any tool that takes a base URL, at it.
-- **Run it headless** on a server so it stays up without your laptop.
+    npm run doctor
+    npm run setup-assistant
+    npm run chat -- "ช่วยสรุปข่าว AI วันนี้"
+    npm run chat -- "แมวน่ารัก" --model gpt-image-2
+    npm run chat -- "summarise this" --file report.pdf
+    npm run chat -- "a street at night" --model seedance-2.0-mini
+    npm run agent -- "add a /health route" --root .
+    npm run models
+    npm run credits
 
-**No credential ever leaves your browser.** The real request runs as ordinary page
-JavaScript inside your own logged-in tab, so Chrome attaches the session cookie
-itself. The bridge never sees it, and nothing is written to disk.
+หมายเหตุ: ต้องใส่ -- ก่อน flags ที่เป็นของ script เอง เช่น npm run chat -- --new ทุกคำสั่งสามารถใช้ -- --help เพื่อดูวิธีใช้งานได้
 
-## Quick start
+หากมีปัญหา npm run doctor จะตรวจสอบ chain ทั้งหมดและระบุจุดที่ต้องแก้
 
-```bash
-npm run dev
-```
+## ใช้เป็น OpenAI-compatible API
 
-Then load the extension — `chrome://extensions` → Developer mode → **Load unpacked**
-→ select `aipass-bridge/extension` — and open a [de.aipass.net/chat](https://de.aipass.net/chat)
-tab. The extension popup should read **Connected**.
+Bridge เปิด endpoint สำหรับเครื่องมือที่รองรับ OpenAI-compatible API โดยใช้ Base URL ของ bridge เป็น http://127.0.0.1:8787/v1
 
-```bash
-npm run doctor                                     # is every link working?
-npm run setup-assistant                            # one-time: the agent's assistant
-npm run chat -- "ช่วยสรุปข่าว AI วันนี้"         # chat, streaming
-npm run chat -- "แมวน่ารัก" --model gpt-image-2   # generate an image
-npm run chat -- "summarise this" --file report.pdf # ask about a document
-npm run chat -- "a street at night" --model seedance-2.0-mini  # generate a video
-npm run agent -- "add a /health route" --root .    # edit local files (dry run)
-npm run models                                     # everything, by category
-npm run credits                                    # what is left of the pool
-```
+## เอกสาร
 
-Note the `--` before a script's own flags: `npm run chat --new` is npm's flag,
-`npm run chat -- --new` is the script's. Every command takes `-- --help`.
+- เอกสารฉบับเต็ม — การติดตั้ง, coding assistant, conversations, models, การสร้างภาพ/วิดีโอ/เพลง, credits, configuration, troubleshooting และ tests
+- Headless deployment — Docker + noVNC สำหรับรัน 24×7 บนเซิร์ฟเวอร์
 
-If something is not working, `npm run doctor` walks the chain and names the one
-thing to fix:
+## หมายเหตุ
 
-```
-✓ bridge         responding
-✗ extension      no tab attached
-                 → open https://de.aipass.net/chat and leave it open
-– login          skipped — nothing attached to ask
-```
+โปรเจกต์นี้ทำงานผ่านบัญชี AiPASS ของคุณเอง โดยใช้แท็บเบราว์เซอร์ที่คุณล็อกอินอยู่ ไม่ได้ bypass authentication, scrape หรือแชร์ credential ใด ๆ แต่เป็นการเพิ่ม developer interface ให้กับบริการที่มีอยู่
 
-Use it from code like any OpenAI endpoint:
+ควรใช้งานอย่างเหมาะสม และแนะนำให้เก็บ bridge ไว้บนเครื่องหรือเครือข่ายที่คุณควบคุมได้
 
-```python
-from openai import OpenAI
-client = OpenAI(base_url="http://127.0.0.1:8787/v1", api_key="sk-dummy")
-```
+## ความปลอดภัย
 
-## Docs
+Bridge ไม่มี authentication ของตัวเอง ควร bind ไว้ที่ 127.0.0.1 เท่านั้น เพราะทุกสิ่งที่เข้าถึงพอร์ตได้อาจใช้ credit ของบัญชี AiPASS ได้
 
-**→ [Full documentation](aipass-bridge/README.md)** — setup, the coding assistant
-and its action set, conversations, models, generating images / video / music,
-credits, configuration, troubleshooting, and tests.
+หาก clone หรือ fork ก่อนวันที่ 2 กันยายน 2026 ควรอัปเดต เนื่องจากสำเนาก่อน commit 8cad676 มี bridge ที่เว็บไซต์ที่คุณเข้าชมอาจสั่งงานได้ โปรดดู SECURITY.md
 
-**→ [Headless deployment](aipass-bridge/deploy/README.md)** — Docker + noVNC, for
-running it 24/7 on a server.
+## การมีส่วนร่วม
 
-## Notes
-
-This drives **your own** AiPASS account through a browser you are already signed in
-to. It does not bypass authentication, scrape, or share anything — it gives a great
-free service the developer interface it was missing. Be reasonable with it, and keep
-your bridge on localhost.
-
-Built on Node with no runtime dependencies, plus an MV3 Chrome extension.
-`npm run dev:next` still starts the Next.js app that this repo was scaffolded from.
-
-## Security
-
-The bridge has no authentication of its own — keep it on `127.0.0.1`. Anything
-that can reach the port can spend the account's credits.
-
-**If you cloned or forked before 2 Sep 2026, update.** Copies taken before
-[`8cad676`](https://github.com/niawjunior/aipass-bridge/commit/8cad676) have a
-bridge that any website you visited could drive. See [SECURITY.md](SECURITY.md).
-
-## Contributing
-
-See [CONTRIBUTING.md](CONTRIBUTING.md). The short version: check
-`git config user.email` before you commit, run `npm test`, and list every file
-you touched — including the incidental ones.
+ดูรายละเอียดใน CONTRIBUTING.md โดยควรตรวจสอบ git config user.email ก่อน commit, รัน npm test และระบุไฟล์ทุกไฟล์ที่แก้ไข
 
 ## Credits
 
-- [**astrathezero**](https://github.com/astrathezero) — the headless Docker
-  deployment, image upload, and the offscreen keepalive that stops the service
-  worker being evicted with no tab open.
-- [**meatasit**](https://github.com/meatasit) — Windows path resolution in the
-  test harness, and the two CLI bugs it uncovered.
+- astrathezero — headless Docker deployment, image upload และ offscreen keepalive
+- meatasit — Windows path resolution ใน test harness และบั๊กของ CLI 2 รายการ
 
 ## License
 
-[MIT](LICENSE). Contributions are welcome and are taken under the same terms.
+MIT — ยินดีรับ contributions ภายใต้เงื่อนไขเดียวกัน
